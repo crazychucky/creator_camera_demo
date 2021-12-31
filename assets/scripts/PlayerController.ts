@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Vec3, systemEvent, SystemEvent,EventKeyboard, RigidBody,CCBoolean } from 'cc';
+import { _decorator, Component, Vec3, input, Input, SystemEvent,EventKeyboard, RigidBody,CCBoolean } from 'cc';
 import { KeyCode } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -12,6 +12,7 @@ enum DIR {
 }
 
 let FORCE = 7
+let SPEED = 10
 
 @ccclass('PlayerController')
 export class PlayerController extends Component {
@@ -37,13 +38,13 @@ export class PlayerController extends Component {
 
 
     onLoad () {
-        systemEvent.on(SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        systemEvent.on(SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
+        input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
     }
 
     onDestroy () {
-        systemEvent.off(SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-        systemEvent.off(SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+        input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
+        input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
     }
 
     onKeyDown (event: EventKeyboard) {
@@ -90,16 +91,24 @@ export class PlayerController extends Component {
 
     update (deltaTime: number) {
         if(this._dirFlags[DIR.FORWARD]){
-            this.rigidBody.applyForce(new Vec3(0, 0, -FORCE))
+            let pos = this.node.getPosition()
+            pos.z = pos.z - deltaTime*SPEED
+            this.node.setPosition(pos)
         }
         if(this._dirFlags[DIR.BACKWARD]){
-            this.rigidBody.applyForce(new Vec3(0, 0, FORCE))
+            let pos = this.node.getPosition()
+            pos.z = pos.z + deltaTime*SPEED
+            this.node.setPosition(pos)
         }
         if(this._dirFlags[DIR.LEFT]){
-            this.rigidBody.applyForce(new Vec3(-FORCE, 0, 0));
+            let pos = this.node.getPosition()
+            pos.x = pos.x - deltaTime*SPEED
+            this.node.setPosition(pos)
         }
         if(this._dirFlags[DIR.RIGHT]){
-            this.rigidBody.applyForce(new Vec3(FORCE, 0, 0));
+            let pos = this.node.getPosition()
+            pos.x = pos.x + deltaTime*SPEED
+            this.node.setPosition(pos)
         }
     }
 }

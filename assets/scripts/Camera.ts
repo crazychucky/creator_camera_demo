@@ -31,7 +31,9 @@ export class Camera extends Component {
     }
 
     update (deltaTime: number) {
-        console.log(this.player.getPosition())
+      let pos = this.player.getPosition()
+      this.node.setPosition(pos)
+        // console.log(this.player.getPosition())
         // this.player.setPosition
         // [4]
     }

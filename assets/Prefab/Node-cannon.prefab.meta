@@ -2,12 +2,12 @@
   "ver": "1.1.35",
   "importer": "prefab",
   "imported": true,
-  "uuid": "43f7134d-3ed8-4192-8dd1-cd7a552b1f51",
+  "uuid": "e9e9968a-ef8a-4244-883a-eba9da9dd28f",
   "files": [
     ".json"
   ],
   "subMetas": {},
   "userData": {
-    "syncNodeName": "MazeWall"
+    "syncNodeName": "Node-cannon"
   }
 }
