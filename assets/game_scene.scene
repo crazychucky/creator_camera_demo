@@ -8980,9 +8980,7 @@
     "__prefab": null,
     "_dirFlags": [],
     "_rotationFlags": [],
-    "rigidBody": {
-      "__id__": 615
-    },
+    "_mouseMoveSpd": 0,
     "_id": "57fa5CMwZEnKhdIOAabHyz"
   },
   {

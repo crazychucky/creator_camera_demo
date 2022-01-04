@@ -1,5 +1,5 @@
 
-import { _decorator, Component, game, input, Input, EventMouse, EventKeyboard, RigidBody,CCBoolean } from 'cc';
+import { _decorator, Component, game, input, Input, EventMouse, EventKeyboard, RigidBody,CCBoolean, CCFloat } from 'cc';
 import { KeyCode } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -28,9 +28,8 @@ export class PlayerController extends Component {
     @property({ type: Array(CCBoolean) })
     private _rotationFlags = []
 
-    @property({ type: RigidBody })
-    private rigidBody = null
-
+    @property({ type: CCFloat })
+    private _mouseMoveSpd = 0
 
     start () {
         for (let key in DIR) {
@@ -43,11 +42,9 @@ export class PlayerController extends Component {
       // let gcs = document.getElementById("GameCanvas")
       // gcs && (gcs.style.cursor = "none")
         // director.getOpenGLView().setCursorVisible(false); 
-        game.canvas.requestPointerLock()
         input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
         input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
-        input.on(Input.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
 
     onDestroy () {
@@ -55,28 +52,15 @@ export class PlayerController extends Component {
         input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
     }
 
-    onMouseDown (event: EventMouse) {
-          //隐藏鼠标
-      if (event.getButton() === 2) {
-        console.log("ddd");
-        // let gcs = document.getElementById("GameCanvas")
-        // gcs.requestPointerLock();//鼠标锁定-隐藏但还可进行操作
-      }
-
-      //显示鼠标
-      if (event.getButton() === 0||event.getButton() === 1) {
-          console.log("ddd");
-          // window.document.exitPointerLock();//鼠标取消锁定-显示鼠标
-      }
-    }
     onMouseMove (event: EventMouse) {
       let dx = event.getDeltaX()
-      let ro = this.node.getRotation()
-      let rx = dx > 0 ? 1 :-1
-      rx = rx*0.01
+      // FIXME:can not stop when stop
+      this._mouseMoveSpd = dx
+      // let ro = this.node.getRotation()
+      // let rx = dx > 0 ? 1 :-1
+      // rx = rx*0.01
       // ro.x = ro.x + rx
-      ro.y = ro.y + rx
-      this.node.setRotation(ro)
+      // ro.y = ro.y + rx
       // console.log("X:" + event.getDeltaX())
       // console.log("Y:" + event.getDeltaY())
     }
@@ -144,6 +128,12 @@ export class PlayerController extends Component {
             let pos = this.node.getPosition()
             pos.x = pos.x + deltaTime*SPEED
             this.node.setPosition(pos)
+        }
+        if(this._mouseMoveSpd!=0){
+          let ro = this.node.getRotation()
+          let add = this._mouseMoveSpd*deltaTime*0.1
+          ro.y = ro.y + add
+          this.node.setRotation(ro)
         }
     }
 }
