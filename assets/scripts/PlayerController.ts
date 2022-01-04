@@ -1,5 +1,5 @@
 
-import { _decorator, Component, Vec3, input, Input, SystemEvent,EventKeyboard, RigidBody,CCBoolean } from 'cc';
+import { _decorator, Component, game, input, Input, EventMouse, EventKeyboard, RigidBody,CCBoolean } from 'cc';
 import { KeyCode } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -11,7 +11,6 @@ enum DIR {
   RIGHT
 }
 
-let FORCE = 7
 let SPEED = 10
 
 @ccclass('PlayerController')
@@ -26,6 +25,9 @@ export class PlayerController extends Component {
     @property({ type: Array(CCBoolean) })
     private _dirFlags = []
 
+    @property({ type: Array(CCBoolean) })
+    private _rotationFlags = []
+
     @property({ type: RigidBody })
     private rigidBody = null
 
@@ -38,8 +40,14 @@ export class PlayerController extends Component {
 
 
     onLoad () {
+      // let gcs = document.getElementById("GameCanvas")
+      // gcs && (gcs.style.cursor = "none")
+        // director.getOpenGLView().setCursorVisible(false); 
+        game.canvas.requestPointerLock()
         input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
+        input.on(Input.EventType.MOUSE_MOVE, this.onMouseMove, this);
+        input.on(Input.EventType.MOUSE_DOWN, this.onMouseDown, this);
     }
 
     onDestroy () {
@@ -47,10 +55,37 @@ export class PlayerController extends Component {
         input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
     }
 
+    onMouseDown (event: EventMouse) {
+          //隐藏鼠标
+      if (event.getButton() === 2) {
+        console.log("ddd");
+        // let gcs = document.getElementById("GameCanvas")
+        // gcs.requestPointerLock();//鼠标锁定-隐藏但还可进行操作
+      }
+
+      //显示鼠标
+      if (event.getButton() === 0||event.getButton() === 1) {
+          console.log("ddd");
+          // window.document.exitPointerLock();//鼠标取消锁定-显示鼠标
+      }
+    }
+    onMouseMove (event: EventMouse) {
+      let dx = event.getDeltaX()
+      let ro = this.node.getRotation()
+      let rx = dx > 0 ? 1 :-1
+      rx = rx*0.01
+      // ro.x = ro.x + rx
+      ro.y = ro.y + rx
+      this.node.setRotation(ro)
+      // console.log("X:" + event.getDeltaX())
+      // console.log("Y:" + event.getDeltaY())
+    }
+
     onKeyDown (event: EventKeyboard) {
         switch(event.keyCode) {
             case KeyCode.ARROW_LEFT:
             case KeyCode.KEY_A:
+              console.log("AAAAAAAA")
                 this._dirFlags[DIR.LEFT] = true
                 break;
             case KeyCode.KEY_D:
