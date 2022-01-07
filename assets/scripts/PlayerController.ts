@@ -1,5 +1,5 @@
 
-import { _decorator, Component, game, input, Input, EventMouse, EventKeyboard, RigidBody,CCBoolean, CCFloat } from 'cc';
+import { _decorator, Component, Vec3, Vec2, input, Input, EventMouse, EventKeyboard, RigidBody,CCBoolean, CCFloat } from 'cc';
 import { KeyCode } from 'cc';
 const { ccclass, property } = _decorator;
 
@@ -28,13 +28,12 @@ export class PlayerController extends Component {
     @property({ type: Array(CCBoolean) })
     private _rotationFlags = []
 
-    @property({ type: CCFloat })
-    private _mouseMoveSpd = 0
-
     start () {
         for (let key in DIR) {
             this._dirFlags[key] = false
         }
+        this._rotationFlags[DIR.LEFT] = false
+        this._rotationFlags[DIR.RIGHT] = false
     }
 
 
@@ -53,23 +52,27 @@ export class PlayerController extends Component {
     }
 
     onMouseMove (event: EventMouse) {
-      let dx = event.getDeltaX()
-      // FIXME:can not stop when stop
-      this._mouseMoveSpd = dx
-      // let ro = this.node.getRotation()
-      // let rx = dx > 0 ? 1 :-1
-      // rx = rx*0.01
-      // ro.x = ro.x + rx
-      // ro.y = ro.y + rx
-      // console.log("X:" + event.getDeltaX())
-      // console.log("Y:" + event.getDeltaY())
+        let isInKeyControl = false
+        for (let flag  of this._rotationFlags){
+            if(flag == true){
+                isInKeyControl = true
+                break
+            }
+        }
+        if(isInKeyControl){
+            return
+        }
+        let dx = event.getDeltaX()
+        let ea = new Vec3(this.node.eulerAngles)
+        let ry = dx > 0 ? -1 : 1
+        ea.y = ea.y + ry
+        this.node.setRotationFromEuler(ea)
     }
 
     onKeyDown (event: EventKeyboard) {
         switch(event.keyCode) {
             case KeyCode.ARROW_LEFT:
             case KeyCode.KEY_A:
-              console.log("AAAAAAAA")
                 this._dirFlags[DIR.LEFT] = true
                 break;
             case KeyCode.KEY_D:
@@ -83,6 +86,12 @@ export class PlayerController extends Component {
             case KeyCode.KEY_S:
             case KeyCode.ARROW_DOWN:
                 this._dirFlags[DIR.BACKWARD] = true
+                break;
+            case KeyCode.KEY_Q:
+                this._rotationFlags[DIR.LEFT] = true
+                break;
+            case KeyCode.KEY_E:
+                this._rotationFlags[DIR.RIGHT] = true
                 break;
         }
     }
@@ -104,36 +113,59 @@ export class PlayerController extends Component {
             case KeyCode.ARROW_DOWN:
                 this._dirFlags[DIR.BACKWARD] = false
                 break;
+            case KeyCode.KEY_Q:
+                this._rotationFlags[DIR.LEFT] = false
+                break;
+            case KeyCode.KEY_E:
+                this._rotationFlags[DIR.RIGHT] = false
+                break;
         }
     }
 
 
     update (deltaTime: number) {
+        let ea = new Vec3(this.node.eulerAngles)
+        let radY = ea.y*Math.PI/180
+        let velocity = new Vec2(0,0)
         if(this._dirFlags[DIR.FORWARD]){
-            let pos = this.node.getPosition()
-            pos.z = pos.z - deltaTime*SPEED
-            this.node.setPosition(pos)
+            velocity.x += Math.cos(radY)*SPEED
+            velocity.y += Math.sin(radY)*SPEED
         }
         if(this._dirFlags[DIR.BACKWARD]){
-            let pos = this.node.getPosition()
-            pos.z = pos.z + deltaTime*SPEED
-            this.node.setPosition(pos)
+          let rad = radY + Math.PI
+          velocity.x += Math.cos(rad) * SPEED
+          velocity.y += Math.sin(rad) * SPEED
         }
         if(this._dirFlags[DIR.LEFT]){
-            let pos = this.node.getPosition()
-            pos.x = pos.x - deltaTime*SPEED
-            this.node.setPosition(pos)
+          let rad = radY + Math.PI*0.5
+          velocity.x += Math.cos(rad) * SPEED
+          velocity.y += Math.sin(rad) * SPEED
         }
         if(this._dirFlags[DIR.RIGHT]){
+          let rad = radY - Math.PI*0.5
+          velocity.x += Math.cos(rad) * SPEED
+          velocity.y += Math.sin(rad) * SPEED
+        }
+        if(velocity.x != 0){
             let pos = this.node.getPosition()
-            pos.x = pos.x + deltaTime*SPEED
+            pos.z = pos.z + deltaTime*velocity.x
             this.node.setPosition(pos)
         }
-        if(this._mouseMoveSpd!=0){
-          let ro = this.node.getRotation()
-          let add = this._mouseMoveSpd*deltaTime*0.1
-          ro.y = ro.y + add
-          this.node.setRotation(ro)
+        if(velocity.y != 0){
+            let pos = this.node.getPosition()
+            pos.x = pos.x + deltaTime*velocity.y
+            this.node.setPosition(pos)
+        }
+
+        if(this._rotationFlags[DIR.RIGHT]){
+            let ry = -1
+            ea.y = ea.y + ry
+            this.node.setRotationFromEuler(ea)
+        }
+        else if(this._rotationFlags[DIR.LEFT]){
+            let ry = 1
+            ea.y = ea.y + ry
+            this.node.setRotationFromEuler(ea)
         }
     }
 }
